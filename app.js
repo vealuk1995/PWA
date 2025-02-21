@@ -1,27 +1,32 @@
+const serviceUUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+const characteristicUUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+
 let device;
 let characteristic;
 
 document.getElementById('connect').addEventListener('click', async () => {
     try {
+        console.log('Requesting Bluetooth device...');
         device = await navigator.bluetooth.requestDevice({
-            filters: [{ namePrefix: 'LilyGO' }],
-            optionalServices: ['4fafc201-1fb5-459e-8fcc-c5c9c331914b']
+            filters: [{ name: 'LilyGO-T-Display-S3' }], // Имя устройства
+            optionalServices: [serviceUUID] // UUID сервиса
         });
 
         console.log('Device found:', device.name);
 
+        console.log('Connecting to GATT server...');
         const server = await device.gatt.connect();
-        console.log('Connected to GATT server');
 
-        const service = await server.getPrimaryService('4fafc201-1fb5-459e-8fcc-c5c9c331914b');
-        console.log('Service found');
+        console.log('Getting primary service...');
+        const service = await server.getPrimaryService(serviceUUID);
 
-        characteristic = await service.getCharacteristic('beb5483e-36e1-4688-b7f5-ea07361b26a8');
-        console.log('Characteristic found');
+        console.log('Getting characteristic...');
+        characteristic = await service.getCharacteristic(characteristicUUID);
 
+        console.log('Connected to LilyGO T-Display S3!');
         alert('Connected to LilyGO T-Display S3!');
     } catch (error) {
-        console.error('Error connecting to device:', error);
+        console.error('Error:', error);
         alert('Failed to connect: ' + error.message);
     }
 });
@@ -36,7 +41,7 @@ document.getElementById('send').addEventListener('click', async () => {
     try {
         const command = new TextEncoder().encode('Hello from PWA');
         await characteristic.writeValue(command);
-        console.log('Command sent');
+        console.log('Command sent:', command);
         alert('Command sent successfully!');
     } catch (error) {
         console.error('Error sending command:', error);
