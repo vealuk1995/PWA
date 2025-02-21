@@ -8,7 +8,7 @@ document.getElementById('connect').addEventListener('click', async () => {
     try {
         console.log('Requesting Bluetooth device...');
         device = await navigator.bluetooth.requestDevice({
-            filters: [{ name: 'LilyGO-T-Display-S3' }], // Имя устройства
+            filters: [{ name: 'LilyGO-T-Display-S3' }], // Фильтр по имени
             optionalServices: [serviceUUID] // UUID сервиса
         });
 
