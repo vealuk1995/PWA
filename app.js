@@ -1,51 +1,61 @@
-// Определяем UUID сервиса и характеристики
-const serviceUUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'; // UUID сервиса
-const characteristicUUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'; // UUID характеристики
-
 let device;
 let characteristic;
 
-document.getElementById('connect').addEventListener('click', async () => {
-    try {
-        console.log('Requesting Bluetooth device...');
-        device = await navigator.bluetooth.requestDevice({
-            filters: [{ name: 'LilyGO-T-Display-S3' }], // Фильтр по имени
-            optionalServices: [serviceUUID] // UUID сервиса
-        });
+// Функция для подключения к устройству по Bluetooth
+async function connect() {
+  try {
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: ['4fafc201-1fb5-459e-8fcc-c5c9c331914b'] }]
+    });
 
-        console.log('Device found:', device.name);
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService('4fafc201-1fb5-459e-8fcc-c5c9c331914b');
+    characteristic = await service.getCharacteristic('beb5483e-36e1-4688-b7f5-ea07361b26a8');
 
-        console.log('Connecting to GATT server...');
-        const server = await device.gatt.connect();
+    console.log("Connected to ESP32");
+  } catch (error) {
+    console.error("Connection failed:", error);
+  }
+}
 
-        console.log('Getting primary service...');
-        const service = await server.getPrimaryService(serviceUUID);
+// Функция для отправки команды изменения режима
+async function changeMode(mode) {
+  if (!device || !characteristic) {
+    await connect();
+  }
+  try {
+    const value = new Uint8Array([mode]);
+    await characteristic.writeValue(value);
+    console.log(`Mode changed to: ${mode}`);
+  } catch (error) {
+    console.error("Failed to change mode:", error);
+  }
+}
 
-        console.log('Getting characteristic...');
-        characteristic = await service.getCharacteristic(characteristicUUID);
+// Функция для отправки команды изменения яркости
+async function changeBrightness(brightness) {
+  if (!device || !characteristic) {
+    await connect();
+  }
+  try {
+    const value = new Uint8Array([6, brightness]); // 6 - код команды для изменения яркости
+    await characteristic.writeValue(value);
+    console.log(`Brightness changed to: ${brightness}`);
+  } catch (error) {
+    console.error("Failed to change brightness:", error);
+  }
+}
 
-        console.log('Connected to LilyGO T-Display S3!');
-        alert('Connected to LilyGO T-Display S3!');
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to connect: ' + error.message);
-    }
+// Обработчики событий для кнопок режимов
+document.querySelectorAll('.controls button').forEach(button => {
+  button.addEventListener('click', (event) => {
+    const mode = parseInt(event.target.getAttribute('data-mode'));
+    changeMode(mode);
+  });
 });
 
-document.getElementById('send').addEventListener('click', async () => {
-    if (!characteristic) {
-        console.error('No characteristic found');
-        alert('Not connected to a device!');
-        return;
-    }
-
-    try {
-        const command = new TextEncoder().encode('Hello from PWA');
-        await characteristic.writeValue(command);
-        console.log('Command sent:', command);
-        alert('Command sent successfully!');
-    } catch (error) {
-        console.error('Error sending command:', error);
-        alert('Failed to send command: ' + error.message);
-    }
+// Обработчик события для слайдера яркости
+document.getElementById('brightness').addEventListener('input', (event) => {
+  const brightness = parseInt(event.target.value);
+  changeBrightness(brightness);
 });
