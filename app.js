@@ -1,5 +1,6 @@
-const serviceUUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
-const characteristicUUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+// Определяем UUID сервиса и характеристики
+const serviceUUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b'; // UUID сервиса
+const characteristicUUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8'; // UUID характеристики
 
 let device;
 let characteristic;
