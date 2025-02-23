@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RGB Light Control</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
+    <title>Matrix ESP32 Control</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>RGB Light Control</h1>
-        <input type="range" id="brightnessSlider" min="0" max="255" value="100">
-        <label for="brightnessSlider">Brightness</label>
-        <select id="effectSelect">
-            <option value="0">Rainbow</option>
-            <option value="1">Fire</option>
-            <option value="2">Wave</option>
-            <option value="3">Stars</option>
-            <option value="4">Gradient</option>
-        </select>
+    <canvas id="matrix"></canvas>
+    <div class="content">
+        <h1>Welcome to Matrix ESP32 Control</h1>
+        <nav>
+            <a href="esp32/esp32_1.html">ESP32 1</a>
+            <a href="esp32/esp32_2.html">ESP32 2</a>
+            <a href="esp32/esp32_3.html">ESP32 3</a>
+        </nav>
     </div>
-    <script src="app.js"></script>
+    <script src="js/matrix.js"></script>
 </body>
 </html>
