@@ -21,10 +21,30 @@ h1 {
   margin-bottom: 20px;
 }
 
+#status {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #ff0000;
+}
+
+#connectButton {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#connectButton:hover {
+  background-color: #0056b3;
+}
+
 .controls {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 20px;
 }
 
 label {
