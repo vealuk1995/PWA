@@ -11,16 +11,27 @@ const statusDiv = document.getElementById("status");
 async function connect() {
   try {
     statusDiv.textContent = "Searching for device...";
+    statusDiv.style.color = "#000000"; // Сброс цвета текста
+
+    // Запрашиваем устройство через Web Bluetooth API
     device = await navigator.bluetooth.requestDevice({
-      filters: [{ name: "LEDMatrixController" }],
-      optionalServices: [SERVICE_UUID]
+      filters: [{ name: "LEDMatrixController" }], // Фильтр по имени устройства
+      optionalServices: [SERVICE_UUID] // Указываем UUID сервиса
     });
+
     statusDiv.textContent = "Connecting to device...";
+
+    // Подключаемся к GATT-серверу устройства
     const server = await device.gatt.connect();
+
+    // Получаем сервис по UUID
     const service = await server.getPrimaryService(SERVICE_UUID);
+
+    // Получаем характеристику по UUID
     characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
     statusDiv.textContent = "Connected";
-    statusDiv.style.color = "#00ff00";
+    statusDiv.style.color = "#00ff00"; // Зеленый цвет для статуса "Connected"
     connectButton.textContent = "Disconnect";
     connectButton.onclick = disconnect;
 
@@ -28,9 +39,12 @@ async function connect() {
     document.querySelectorAll(".controls input, .controls select").forEach(element => {
       element.disabled = false;
     });
+
+    // Обработчик отключения устройства
+    device.addEventListener('gattserverdisconnected', onDisconnected);
   } catch (error) {
     statusDiv.textContent = "Failed to connect: " + error.message;
-    statusDiv.style.color = "#ff0000";
+    statusDiv.style.color = "#ff0000"; // Красный цвет для ошибки
     console.error("Connection failed:", error);
   }
 }
@@ -39,23 +53,43 @@ async function connect() {
 async function disconnect() {
   if (device && device.gatt.connected) {
     await device.gatt.disconnect();
-    statusDiv.textContent = "Disconnected";
-    statusDiv.style.color = "#ff0000";
-    connectButton.textContent = "Connect to Device";
-    connectButton.onclick = connect;
+    onDisconnected();
+  }
+}
 
-    // Отключаем элементы управления
-    document.querySelectorAll(".controls input, .controls select").forEach(element => {
-      element.disabled = true;
-    });
+// Функция, вызываемая при отключении устройства
+function onDisconnected() {
+  statusDiv.textContent = "Disconnected";
+  statusDiv.style.color = "#ff0000"; // Красный цвет для статуса "Disconnected"
+  connectButton.textContent = "Connect to Device";
+  connectButton.onclick = connect;
+
+  // Отключаем элементы управления
+  document.querySelectorAll(".controls input, .controls select").forEach(element => {
+    element.disabled = true;
+  });
+
+  // Удаляем обработчик отключения
+  if (device) {
+    device.removeEventListener('gattserverdisconnected', onDisconnected);
   }
 }
 
 // Функция для отправки команд
 async function sendCommand(command) {
   if (characteristic) {
-    await characteristic.writeValue(new TextEncoder().encode(command));
-    console.log("Command sent:", command);
+    try {
+      await characteristic.writeValue(new TextEncoder().encode(command));
+      console.log("Command sent:", command);
+    } catch (error) {
+      console.error("Failed to send command:", error);
+      statusDiv.textContent = "Failed to send command: " + error.message;
+      statusDiv.style.color = "#ff0000";
+    }
+  } else {
+    console.error("Characteristic is not available.");
+    statusDiv.textContent = "Characteristic is not available.";
+    statusDiv.style.color = "#ff0000";
   }
 }
 
@@ -65,7 +99,7 @@ document.getElementById("mode").addEventListener("change", (e) => {
 });
 
 document.getElementById("color").addEventListener("change", (e) => {
-  sendCommand(`color:${e.target.value.slice(1)}`);
+  sendCommand(`color:${e.target.value.slice(1)}`); // Убираем '#' из HEX-цвета
 });
 
 document.getElementById("brightness").addEventListener("input", (e) => {
