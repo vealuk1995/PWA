@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RGB Light Control</title>
+  <title>LED Matrix Controller</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h1>RGB Light Control</h1>
-    <button id="connect" class="button">Connect</button>
-    <input type="range" id="brightness" class="slider" min="0" max="255" value="100">
-    <select id="effect">
-      <option value="0">Rainbow</option>
-      <option value="1">Fire</option>
-      <option value="2">Color Wipe</option>
-      <option value="3">Running Dot</option>
-      <option value="4">Color Waves</option>
-      <option value="5">Random Flashes</option>
-      <option value="6">Gradient</option>
-    </select>
+    <h1>LED Matrix Controller</h1>
+    <div class="controls">
+      <label for="mode">Mode:</label>
+      <select id="mode">
+        <option value="0">Static Color</option>
+        <option value="1">Pulse</option>
+        <option value="2">Fire</option>
+        <option value="3">Gradient</option>
+      </select>
+      <label for="color">Color:</label>
+      <input type="color" id="color" value="#ff0000">
+      <label for="brightness">Brightness:</label>
+      <input type="range" id="brightness" min="0" max="255" value="100">
+      <label for="speed">Speed:</label>
+      <input type="range" id="speed" min="10" max="200" value="50">
+    </div>
   </div>
   <script src="app.js"></script>
 </body>
