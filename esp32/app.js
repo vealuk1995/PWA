@@ -60,11 +60,6 @@ function onDisconnected() {
   connectButton.textContent = "Connect to Device";
   connectButton.onclick = connect;
 
-  // Отключаем элементы управления
-  document.querySelectorAll(".controls input, .controls select, #sendCommandButton").forEach(element => {
-    element.disabled = true;
-  });
-
   // Удаляем обработчик отключения
   if (device) {
     device.removeEventListener('gattserverdisconnected', onDisconnected);
