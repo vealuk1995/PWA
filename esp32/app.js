@@ -132,7 +132,3 @@ document.getElementById("sendCommandButton").addEventListener("click", () => {
 // Инициализация кнопки подключения
 connectButton.onclick = connect;
 
-// Отключаем элементы управления по умолчанию
-document.querySelectorAll(".controls input, .controls select, #sendCommandButton").forEach(element => {
-  element.disabled = true;
-});
