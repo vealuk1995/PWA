@@ -3,6 +3,8 @@ const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
 let characteristic;
 let device;
+let commandQueue = []; // Очередь команд
+let isSending = false; // Флаг, указывающий, выполняется ли отправка команды
 
 const connectButton = document.getElementById("connectButton");
 const statusDiv = document.getElementById("status");
@@ -11,27 +13,21 @@ const statusDiv = document.getElementById("status");
 async function connect() {
   try {
     statusDiv.textContent = "Searching for device...";
-    statusDiv.style.color = "#000000"; // Сброс цвета текста
+    statusDiv.style.color = "#000000";
 
-    // Запрашиваем устройство через Web Bluetooth API
     device = await navigator.bluetooth.requestDevice({
-      filters: [{ name: "LEDMatrixController" }], // Фильтр по имени устройства
-      optionalServices: [SERVICE_UUID] // Указываем UUID сервиса
+      filters: [{ name: "LEDMatrixController" }],
+      optionalServices: [SERVICE_UUID]
     });
 
     statusDiv.textContent = "Connecting to device...";
 
-    // Подключаемся к GATT-серверу устройства
     const server = await device.gatt.connect();
-
-    // Получаем сервис по UUID
     const service = await server.getPrimaryService(SERVICE_UUID);
-
-    // Получаем характеристику по UUID
     characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
 
     statusDiv.textContent = "Connected";
-    statusDiv.style.color = "#00ff00"; // Зеленый цвет для статуса "Connected"
+    statusDiv.style.color = "#00ff00";
     connectButton.textContent = "Disconnect";
     connectButton.onclick = disconnect;
 
@@ -44,7 +40,7 @@ async function connect() {
     device.addEventListener('gattserverdisconnected', onDisconnected);
   } catch (error) {
     statusDiv.textContent = "Failed to connect: " + error.message;
-    statusDiv.style.color = "#ff0000"; // Красный цвет для ошибки
+    statusDiv.style.color = "#ff0000";
     console.error("Connection failed:", error);
   }
 }
@@ -60,7 +56,7 @@ async function disconnect() {
 // Функция, вызываемая при отключении устройства
 function onDisconnected() {
   statusDiv.textContent = "Disconnected";
-  statusDiv.style.color = "#ff0000"; // Красный цвет для статуса "Disconnected"
+  statusDiv.style.color = "#ff0000";
   connectButton.textContent = "Connect to Device";
   connectButton.onclick = connect;
 
@@ -77,20 +73,37 @@ function onDisconnected() {
 
 // Функция для отправки команд
 async function sendCommand(command) {
-  if (characteristic) {
-    try {
-      await characteristic.writeValue(new TextEncoder().encode(command));
-      console.log("Command sent:", command);
-    } catch (error) {
-      console.error("Failed to send command:", error);
-      statusDiv.textContent = "Failed to send command: " + error.message;
-      statusDiv.style.color = "#ff0000";
-    }
-  } else {
-    console.error("Characteristic is not available.");
-    statusDiv.textContent = "Characteristic is not available.";
+  // Добавляем команду в очередь
+  commandQueue.push(command);
+
+  // Если отправка уже выполняется, выходим
+  if (isSending) return;
+
+  // Начинаем обработку очереди
+  processQueue();
+}
+
+// Функция для обработки очереди команд
+async function processQueue() {
+  if (commandQueue.length === 0 || !characteristic) {
+    isSending = false;
+    return;
+  }
+
+  isSending = true;
+  const command = commandQueue.shift(); // Извлекаем первую команду из очереди
+
+  try {
+    await characteristic.writeValue(new TextEncoder().encode(command));
+    console.log("Command sent:", command);
+  } catch (error) {
+    console.error("Failed to send command:", error);
+    statusDiv.textContent = "Failed to send command: " + error.message;
     statusDiv.style.color = "#ff0000";
   }
+
+  // Рекурсивно обрабатываем следующую команду
+  processQueue();
 }
 
 // Обработчики событий для элементов управления
