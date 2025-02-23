@@ -1,28 +1,38 @@
-let device;
 let characteristic;
 
 async function connect() {
-  console.log("Trying to connect..."); // Отладочное сообщение
-  try {
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: ['1234'] }] // Убедитесь, что UUID совпадает с ESP32
-    });
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [{ name: "LEDMatrixController" }],
+    optionalServices: [SERVICE_UUID]
+  });
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(SERVICE_UUID);
+  characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+  console.log("Connected to BLE device");
+}
 
-    console.log("Device found:", device.name); // Отладочное сообщение
-
-    const server = await device.gatt.connect();
-    console.log("Connected to GATT server"); // Отладочное сообщение
-
-    const service = await server.getPrimaryService('1234');
-    console.log("Service found"); // Отладочное сообщение
-
-    characteristic = await service.getCharacteristic('5678');
-    console.log("Characteristic found"); // Отладочное сообщение
-
-    console.log('Connected to device');
-  } catch (error) {
-    console.error('Connection failed', error); // Отладочное сообщение
+async function sendCommand(command) {
+  if (characteristic) {
+    await characteristic.writeValue(new TextEncoder().encode(command));
+    console.log("Command sent:", command);
   }
 }
 
-document.getElementById('connect').addEventListener('click', connect);
+document.getElementById("mode").addEventListener("change", (e) => {
+  sendCommand(`mode:${e.target.value}`);
+});
+
+document.getElementById("color").addEventListener("change", (e) => {
+  sendCommand(`color:${e.target.value.slice(1)}`);
+});
+
+document.getElementById("brightness").addEventListener("input", (e) => {
+  sendCommand(`brightness:${e.target.value}`);
+});
+
+document.getElementById("speed").addEventListener("input", (e) => {
+  sendCommand(`speed:${e.target.value}`);
+});
+
+// Подключение при загрузке страницы
+connect();
