@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 1 Control</title>
-    <link rel="stylesheet" href="../css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RGB Light Control</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <canvas id="matrix"></canvas>
-    <div class="content">
-        <h1>ESP32 1 Control</h1>
-        <button id="ledOn">Turn LED On</button>
-        <button id="ledOff">Turn LED Off</button>
-    </div>
-    <script src="../js/matrix.js"></script>
-    <script>
-        document.getElementById('ledOn').addEventListener('click', () => {
-            fetch('/control/esp32_1/on')
-                .then(response => response.text())
-                .then(data => console.log(data));
-        });
-
-        document.getElementById('ledOff').addEventListener('click', () => {
-            fetch('/control/esp32_1/off')
-                .then(response => response.text())
-                .then(data => console.log(data));
-        });
-    </script>
+  <div class="container">
+    <h1>RGB Light Control</h1>
+    <button id="connect" class="button">Connect</button>
+    <input type="range" id="brightness" class="slider" min="0" max="255" value="100">
+    <select id="effect">
+      <option value="0">Rainbow</option>
+      <option value="1">Fire</option>
+      <option value="2">Color Wipe</option>
+      <option value="3">Running Dot</option>
+      <option value="4">Color Waves</option>
+      <option value="5">Random Flashes</option>
+      <option value="6">Gradient</option>
+    </select>
+  </div>
+  <script src="app.js"></script>
 </body>
 </html>
