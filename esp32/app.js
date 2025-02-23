@@ -3,8 +3,8 @@ const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
 let characteristic;
 let device;
-let commandQueue = []; // Очередь команд
-let isSending = false; // Флаг, указывающий, выполняется ли отправка команды
+let commandQueue = [];
+let isSending = false;
 
 const connectButton = document.getElementById("connectButton");
 const statusDiv = document.getElementById("status");
@@ -32,7 +32,7 @@ async function connect() {
     connectButton.onclick = disconnect;
 
     // Включаем элементы управления
-    document.querySelectorAll(".controls input, .controls select").forEach(element => {
+    document.querySelectorAll(".controls input, .controls select, #sendCommandButton").forEach(element => {
       element.disabled = false;
     });
 
@@ -61,7 +61,7 @@ function onDisconnected() {
   connectButton.onclick = connect;
 
   // Отключаем элементы управления
-  document.querySelectorAll(".controls input, .controls select").forEach(element => {
+  document.querySelectorAll(".controls input, .controls select, #sendCommandButton").forEach(element => {
     element.disabled = true;
   });
 
@@ -73,13 +73,8 @@ function onDisconnected() {
 
 // Функция для отправки команд
 async function sendCommand(command) {
-  // Добавляем команду в очередь
   commandQueue.push(command);
-
-  // Если отправка уже выполняется, выходим
   if (isSending) return;
-
-  // Начинаем обработку очереди
   processQueue();
 }
 
@@ -91,7 +86,7 @@ async function processQueue() {
   }
 
   isSending = true;
-  const command = commandQueue.shift(); // Извлекаем первую команду из очереди
+  const command = commandQueue.shift();
 
   try {
     await characteristic.writeValue(new TextEncoder().encode(command));
@@ -102,7 +97,6 @@ async function processQueue() {
     statusDiv.style.color = "#ff0000";
   }
 
-  // Рекурсивно обрабатываем следующую команду
   processQueue();
 }
 
@@ -112,7 +106,7 @@ document.getElementById("mode").addEventListener("change", (e) => {
 });
 
 document.getElementById("color").addEventListener("change", (e) => {
-  sendCommand(`color:${e.target.value.slice(1)}`); // Убираем '#' из HEX-цвета
+  sendCommand(`color:${e.target.value.slice(1)}`);
 });
 
 document.getElementById("brightness").addEventListener("input", (e) => {
@@ -123,10 +117,22 @@ document.getElementById("speed").addEventListener("input", (e) => {
   sendCommand(`speed:${e.target.value}`);
 });
 
+// Обработчик для кнопки отправки команды
+document.getElementById("sendCommandButton").addEventListener("click", () => {
+  const mode = document.getElementById("mode").value;
+  const color = document.getElementById("color").value.slice(1); // Убираем '#'
+  const brightness = document.getElementById("brightness").value;
+  const speed = document.getElementById("speed").value;
+
+  // Формируем команду
+  const command = `mode:${mode};color:${color};brightness:${brightness};speed:${speed}`;
+  sendCommand(command);
+});
+
 // Инициализация кнопки подключения
 connectButton.onclick = connect;
 
 // Отключаем элементы управления по умолчанию
-document.querySelectorAll(".controls input, .controls select").forEach(element => {
+document.querySelectorAll(".controls input, .controls select, #sendCommandButton").forEach(element => {
   element.disabled = true;
 });
