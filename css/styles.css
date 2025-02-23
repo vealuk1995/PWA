@@ -1,1 +1,40 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+    color: lime;
+    background-color: black;
+}
 
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding-top: 20%;
+}
+
+h1 {
+    font-size: 3em;
+}
+
+nav a {
+    color: lime;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1.5em;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
